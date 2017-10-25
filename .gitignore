@@ -92,3 +92,6 @@ output
 model
 
 .db
+
+# Model
+.params 

@@ -270,7 +270,6 @@ class DataParallelExecutorGroup(object):
             else:
                 self.execs.append(self._bind_ith_exec(i, data_shapes_i, label_shapes_i,
                                                       shared_group))
-
         self.data_shapes = data_shapes
         self.label_shapes = label_shapes
         self._collect_arrays()

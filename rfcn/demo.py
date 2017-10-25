@@ -5,7 +5,7 @@
 # Written by Yi Li, Haocheng Zhang
 # --------------------------------------------------------
 
-from . import _init_paths
+import _init_paths
 
 import argparse
 import os
@@ -13,7 +13,7 @@ import sys
 import logging
 import pprint
 import cv2
-from .config.config import config, update_config
+from config.config import config, update_config
 from utils.image import resize, transform
 import numpy as np
 # get config
@@ -25,8 +25,8 @@ update_config(cur_path + '/../experiments/rfcn/cfgs/rfcn_coco_demo.yaml')
 
 sys.path.insert(0, os.path.join(cur_path, '../external/mxnet', config.MXNET_VERSION))
 import mxnet as mx
-from .core.tester import im_detect, Predictor
-from .symbols import *
+from core.tester import im_detect, Predictor
+from symbols import *
 from utils.load_model import load_param
 from utils.show_boxes import show_boxes
 from utils.tictoc import tic, toc
@@ -43,6 +43,9 @@ def parse_args():
 args = parse_args()
 
 def main():
+    import mxnet as mx
+    import mxnet.ndarray as nd
+    nd.zeros((1, 3, 600, 1000), mx.gpu(0), dtype=float)
     # get symbol
     pprint.pprint(config)
     config.symbol = 'resnet_v1_101_rfcn_dcn' if not args.rfcn_only else 'resnet_v1_101_rfcn'

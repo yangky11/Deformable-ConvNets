@@ -385,7 +385,6 @@ class Module(BaseModule):
             shared_group = shared_module._exec_group
         else:
             shared_group = None
-
         self._exec_group = DataParallelExecutorGroup(self._symbol, self._context,
                                                      self._work_load_list, self._data_shapes,
                                                      self._label_shapes, self._param_names,
