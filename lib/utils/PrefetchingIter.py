@@ -57,7 +57,7 @@ class PrefetchingIter(mx.io.DataIter):
                 if not self.started:
                     break
                 try:
-                    self.next_batch[i] = self.iters[i].next()
+                    self.next_batch[i] = next(self.iters[i])
                 except StopIteration:
                     self.next_batch[i] = None
                 self.data_taken[i].clear()
@@ -122,7 +122,7 @@ class PrefetchingIter(mx.io.DataIter):
                 e.set()
             return True
 
-    def next(self):
+    def __next__(self):
         if self.iter_next():
             return self.current_batch
         else:

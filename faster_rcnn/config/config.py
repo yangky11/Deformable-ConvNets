@@ -168,7 +168,7 @@ def update_config(config_file):
     exp_config = None
     with open(config_file) as f:
         exp_config = edict(yaml.load(f))
-        for k, v in exp_config.items():
+        for k, v in list(exp_config.items()):
             if k in config:
                 if isinstance(v, dict):
                     if k == 'TRAIN':
@@ -177,7 +177,7 @@ def update_config(config_file):
                     elif k == 'network':
                         if 'PIXEL_MEANS' in v:
                             v['PIXEL_MEANS'] = np.array(v['PIXEL_MEANS'])
-                    for vk, vv in v.items():
+                    for vk, vv in list(v.items()):
                         config[k][vk] = vv
                 else:
                     if k == 'SCALES':

@@ -83,7 +83,7 @@ def train_net(args, ctx, pretrained, epoch, prefix, begin_epoch, end_epoch, lr, 
     max_data_shape = [('data', (config.TRAIN.BATCH_IMAGES, 3, max([v[0] for v in max_scale]), max([v[1] for v in max_scale])))]
     max_label_shape = [('label', (config.TRAIN.BATCH_IMAGES, 1, max([v[0] for v in max_scale]), max([v[1] for v in max_scale])))]
     max_data_shape, max_label_shape = train_data.infer_shape(max_data_shape, max_label_shape)
-    print 'providing maximum shape', max_data_shape, max_label_shape
+    print('providing maximum shape', max_data_shape, max_label_shape)
 
     # infer shape
     data_shape_dict = dict(train_data.provide_data_single + train_data.provide_label_single)
@@ -92,10 +92,10 @@ def train_net(args, ctx, pretrained, epoch, prefix, begin_epoch, end_epoch, lr, 
 
     # load and initialize params
     if config.TRAIN.RESUME:
-        print 'continue training from ', begin_epoch
+        print('continue training from ', begin_epoch)
         arg_params, aux_params = load_param(prefix, begin_epoch, convert=True)
     else:
-        print pretrained
+        print(pretrained)
         arg_params, aux_params = load_param(pretrained, epoch, convert=True)
         sym_instance.init_weights(config, arg_params, aux_params)
 
@@ -108,8 +108,8 @@ def train_net(args, ctx, pretrained, epoch, prefix, begin_epoch, end_epoch, lr, 
     label_names = [k[0] for k in train_data.provide_label_single]
 
     mod = MutableModule(sym, data_names=data_names, label_names=label_names,
-                        logger=logger, context=ctx, max_data_shapes=[max_data_shape for _ in xrange(batch_size)],
-                        max_label_shapes=[max_label_shape for _ in xrange(batch_size)], fixed_param_prefix=fixed_param_prefix)
+                        logger=logger, context=ctx, max_data_shapes=[max_data_shape for _ in range(batch_size)],
+                        max_label_shapes=[max_label_shape for _ in range(batch_size)], fixed_param_prefix=fixed_param_prefix)
 
     # decide training params
     # metric
@@ -131,7 +131,7 @@ def train_net(args, ctx, pretrained, epoch, prefix, begin_epoch, end_epoch, lr, 
     lr_epoch_diff = [epoch - begin_epoch for epoch in lr_epoch if epoch > begin_epoch]
     lr = base_lr * (lr_factor ** (len(lr_epoch) - len(lr_epoch_diff)))
     lr_iters = [int(epoch * len(segdb) / batch_size) for epoch in lr_epoch_diff]
-    print 'lr', lr, 'lr_epoch_diff', lr_epoch_diff, 'lr_iters', lr_iters
+    print('lr', lr, 'lr_epoch_diff', lr_epoch_diff, 'lr_iters', lr_iters)
 
     lr_scheduler = WarmupMultiFactorScheduler(lr_iters, lr_factor, config.TRAIN.warmup, config.TRAIN.warmup_lr, config.TRAIN.warmup_step)
 
@@ -153,7 +153,7 @@ def train_net(args, ctx, pretrained, epoch, prefix, begin_epoch, end_epoch, lr, 
             arg_params=arg_params, aux_params=aux_params, begin_epoch=begin_epoch, num_epoch=end_epoch)
 
 def main():
-    print 'Called with argument:', args
+    print('Called with argument:', args)
     ctx = [mx.gpu(int(i)) for i in config.gpus.split(',')]
     train_net(args, ctx, config.network.pretrained, config.network.pretrained_epoch, config.TRAIN.model_prefix,
               config.TRAIN.begin_epoch, config.TRAIN.end_epoch, config.TRAIN.lr, config.TRAIN.lr_step)

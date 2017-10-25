@@ -6,13 +6,13 @@
 # Written by Zheng Zhang
 # --------------------------------------------------------
 
-import cPickle
+import pickle
 import os
 import cv2
 import numpy as np
 import itertools
 
-from imdb import IMDB
+from .imdb import IMDB
 from PIL import Image
 
 class CityScape(IMDB):
@@ -34,7 +34,7 @@ class CityScape(IMDB):
         self.num_classes = 19
         self.image_set_index = self.load_image_set_index()
         self.num_images = len(self.image_set_index)
-        print 'num_images', self.num_images
+        print('num_images', self.num_images)
 
         self.config = {'comp_id': 'comp4',
                        'use_diff': False,
@@ -110,14 +110,14 @@ class CityScape(IMDB):
         cache_file = os.path.join(self.cache_path, self.name + '_gt_segdb.pkl')
         if os.path.exists(cache_file):
             with open(cache_file, 'rb') as fid:
-                segdb = cPickle.load(fid)
-            print '{} gt segdb loaded from {}'.format(self.name, cache_file)
+                segdb = pickle.load(fid)
+            print('{} gt segdb loaded from {}'.format(self.name, cache_file))
             return segdb
 
         gt_segdb = [self.load_segdb_from_index(index) for index in self.image_set_index]
         with open(cache_file, 'wb') as fid:
-            cPickle.dump(gt_segdb, fid, cPickle.HIGHEST_PROTOCOL)
-        print 'wrote gt segdb to {}'.format(cache_file)
+            pickle.dump(gt_segdb, fid, pickle.HIGHEST_PROTOCOL)
+        print('wrote gt segdb to {}'.format(cache_file))
 
         return gt_segdb
 

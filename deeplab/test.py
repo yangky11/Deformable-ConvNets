@@ -94,7 +94,7 @@ def test_deeplab():
     pred_eval(predictor, test_data, imdb, vis=args.vis, ignore_cache=args.ignore_cache, logger=logger)
 
 def main():
-    print args
+    print(args)
     test_deeplab()
 
 

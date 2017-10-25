@@ -6,7 +6,7 @@
 # Modified by Bin Xiao
 # --------------------------------------------------------
 
-import cPickle
+import pickle
 import mxnet as mx
 from utils.symbol import Symbol
 from operator_py.proposal import *
@@ -757,7 +757,7 @@ class resnet_v1_101_rcnn(Symbol):
                                                                   num_classes=num_reg_classes,
                                                                   batch_images=cfg.TRAIN.BATCH_IMAGES,
                                                                   batch_rois=cfg.TRAIN.BATCH_ROIS,
-                                                                  cfg=cPickle.dumps(cfg),
+                                                                  cfg=pickle.dumps(cfg),
                                                                   fg_fraction=cfg.TRAIN.FG_FRACTION)
         else:
             # ROI Proposal

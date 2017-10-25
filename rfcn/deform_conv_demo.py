@@ -5,12 +5,12 @@
 # Written by Yi Li, Haocheng Zhang
 # --------------------------------------------------------
 
-import _init_paths
+from . import _init_paths
 import os
 import sys
 import pprint
 import cv2
-from config.config import config, update_config
+from .config.config import config, update_config
 from utils.image import resize, transform
 import numpy as np
 # get config
@@ -22,8 +22,8 @@ update_config(cur_path + '/../experiments/rfcn/cfgs/deform_conv_demo.yaml')
 
 sys.path.insert(0, os.path.join(cur_path, '../external/mxnet', config.MXNET_VERSION))
 import mxnet as mx
-from core.tester import Predictor
-from symbols import *
+from .core.tester import Predictor
+from .symbols import *
 from utils.load_model import load_param
 from utils.show_offset import show_dconv_offset
 
@@ -52,10 +52,10 @@ def main():
     # get predictor
     data_names = ['data', 'im_info']
     label_names = []
-    data = [[mx.nd.array(data[i][name]) for name in data_names] for i in xrange(len(data))]
+    data = [[mx.nd.array(data[i][name]) for name in data_names] for i in range(len(data))]
     max_data_shape = [[('data', (1, 3, max([v[0] for v in config.SCALES]), max([v[1] for v in config.SCALES])))]]
-    provide_data = [[(k, v.shape) for k, v in zip(data_names, data[i])] for i in xrange(len(data))]
-    provide_label = [None for i in xrange(len(data))]
+    provide_data = [[(k, v.shape) for k, v in zip(data_names, data[i])] for i in range(len(data))]
+    provide_label = [None for i in range(len(data))]
     arg_params, aux_params = load_param(cur_path + '/../model/deform_conv', 0, process=True)
     predictor = Predictor(sym, data_names, label_names,
                           context=[mx.gpu(0)], max_data_shapes=max_data_shape,

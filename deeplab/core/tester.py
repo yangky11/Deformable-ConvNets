@@ -6,14 +6,14 @@
 # Modified by Zheng Zhang
 # --------------------------------------------------------
 
-import cPickle
+import pickle
 import os
 import time
 import mxnet as mx
 import numpy as np
 
 from PIL import Image
-from module import MutableModule
+from .module import MutableModule
 from config.config import config
 from utils import image
 from utils.PrefetchingIter import PrefetchingIter
@@ -32,7 +32,7 @@ class Predictor(object):
     def predict(self, data_batch):
         self._mod.forward(data_batch)
         # [dict(zip(self._mod.output_names, _)) for _ in zip(*self._mod.get_outputs(merge_multi_context=False))]
-        return [dict(zip(self._mod.output_names, _)) for _ in zip(*self._mod.get_outputs(merge_multi_context=False))]
+        return [dict(list(zip(self._mod.output_names, _))) for _ in zip(*self._mod.get_outputs(merge_multi_context=False))]
 
 def pred_eval(predictor, test_data, imdb, vis=False, ignore_cache=None, logger=None):
     """
@@ -49,21 +49,21 @@ def pred_eval(predictor, test_data, imdb, vis=False, ignore_cache=None, logger=N
     res_file = os.path.join(imdb.result_path, imdb.name + '_segmentations.pkl')
     if os.path.exists(res_file) and not ignore_cache:
         with open(res_file , 'rb') as fid:
-            evaluation_results = cPickle.load(fid)
-        print 'evaluate segmentation: \n'
+            evaluation_results = pickle.load(fid)
+        print('evaluate segmentation: \n')
         if logger:
             logger.info('evaluate segmentation: \n')
 
         meanIU = evaluation_results['meanIU']
         IU_array = evaluation_results['IU_array']
-        print 'IU_array:\n'
+        print('IU_array:\n')
         if logger:
             logger.info('IU_array:\n')
         for i in range(len(IU_array)):
-            print '%.5f'%IU_array[i]
+            print('%.5f'%IU_array[i])
             if logger:
                 logger.info('%.5f'%IU_array[i])
-        print 'meanIU:%.5f'%meanIU
+        print('meanIU:%.5f'%meanIU)
         if logger:
             logger.info( 'meanIU:%.5f'%meanIU)
         return
@@ -73,7 +73,7 @@ def pred_eval(predictor, test_data, imdb, vis=False, ignore_cache=None, logger=N
         test_data = PrefetchingIter(test_data)
 
     num_images = imdb.num_images
-    all_segmentation_result = [[] for _ in xrange(num_images)]
+    all_segmentation_result = [[] for _ in range(num_images)]
     idx = 0
 
     data_time, net_time, post_time = 0.0, 0.0, 0.0
@@ -95,7 +95,7 @@ def pred_eval(predictor, test_data, imdb, vis=False, ignore_cache=None, logger=N
         data_time += t1
         net_time += t2
         post_time += t3
-        print 'testing {}/{} data {:.4f}s net {:.4f}s post {:.4f}s'.format(idx, imdb.num_images, data_time / idx * test_data.batch_size, net_time / idx * test_data.batch_size, post_time / idx * test_data.batch_size)
+        print('testing {}/{} data {:.4f}s net {:.4f}s post {:.4f}s'.format(idx, imdb.num_images, data_time / idx * test_data.batch_size, net_time / idx * test_data.batch_size, post_time / idx * test_data.batch_size))
         if logger:
             logger.info('testing {}/{} data {:.4f}s net {:.4f}s post {:.4f}s'.format(idx, imdb.num_images, data_time / idx * test_data.batch_size, net_time / idx * test_data.batch_size, post_time / idx * test_data.batch_size))
 
@@ -103,21 +103,21 @@ def pred_eval(predictor, test_data, imdb, vis=False, ignore_cache=None, logger=N
 
     if not os.path.exists(res_file) or ignore_cache:
         with open(res_file, 'wb') as f:
-            cPickle.dump(evaluation_results, f, protocol=cPickle.HIGHEST_PROTOCOL)
+            pickle.dump(evaluation_results, f, protocol=pickle.HIGHEST_PROTOCOL)
 
-    print 'evaluate segmentation: \n'
+    print('evaluate segmentation: \n')
     if logger:
         logger.info('evaluate segmentation: \n')
 
     meanIU = evaluation_results['meanIU']
     IU_array = evaluation_results['IU_array']
-    print 'IU_array:\n'
+    print('IU_array:\n')
     if logger:
         logger.info('IU_array:\n')
     for i in range(len(IU_array)):
-        print '%.5f'%IU_array[i]
+        print('%.5f'%IU_array[i])
         if logger:
             logger.info('%.5f'%IU_array[i])
-    print 'meanIU:%.5f'%meanIU
+    print('meanIU:%.5f'%meanIU)
     if logger:
         logger.info( 'meanIU:%.5f'%meanIU)

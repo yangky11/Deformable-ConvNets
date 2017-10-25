@@ -19,11 +19,11 @@ def get_segmentation_test_batch(segdb, config):
     """
     imgs, seg_cls_gts, segdb = get_segmentation_image(segdb, config)
     im_array = imgs
-    im_info = [np.array([segdb[i]['im_info']], dtype=np.float32) for i in xrange(len(segdb))]
+    im_info = [np.array([segdb[i]['im_info']], dtype=np.float32) for i in range(len(segdb))]
 
     data = [{'data': im_array[i],
-            'im_info': im_info[i]} for i in xrange(len(segdb))]
-    label = [{'label':seg_cls_gts[i]} for i in xrange(len(segdb))]
+            'im_info': im_info[i]} for i in range(len(segdb))]
+    label = [{'label':seg_cls_gts[i]} for i in range(len(segdb))]
 
     return data, label, im_info
 

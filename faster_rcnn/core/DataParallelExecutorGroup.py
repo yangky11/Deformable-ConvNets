@@ -145,7 +145,7 @@ class DataParallelExecutorGroup(object):
                     self.grad_req[k] = 'null'
         elif isinstance(grad_req, (list, tuple)):
             assert len(grad_req) == len(self.arg_names)
-            self.grad_req = dict(zip(self.arg_names, grad_req))
+            self.grad_req = dict(list(zip(self.arg_names, grad_req)))
         elif isinstance(grad_req, dict):
             self.grad_req = {}
             for k in self.arg_names:

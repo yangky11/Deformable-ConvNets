@@ -30,15 +30,15 @@ class Symbol:
         fan_in = float(shape[1])
         if len(shape) > 2:
             fan_in *= np.prod(shape[2:])
-        print(np.sqrt(2 / fan_in))
+        print((np.sqrt(2 / fan_in)))
         return np.sqrt(2 / fan_in)
 
     def infer_shape(self, data_shape_dict):
         # infer shape
         arg_shape, out_shape, aux_shape = self.sym.infer_shape(**data_shape_dict)
-        self.arg_shape_dict = dict(zip(self.sym.list_arguments(), arg_shape))
-        self.out_shape_dict = dict(zip(self.sym.list_outputs(), out_shape))
-        self.aux_shape_dict = dict(zip(self.sym.list_auxiliary_states(), aux_shape))
+        self.arg_shape_dict = dict(list(zip(self.sym.list_arguments(), arg_shape)))
+        self.out_shape_dict = dict(list(zip(self.sym.list_outputs(), out_shape)))
+        self.aux_shape_dict = dict(list(zip(self.sym.list_auxiliary_states(), aux_shape)))
 
     def check_parameter_shapes(self, arg_params, aux_params, data_shape_dict, is_train=True):
         for k in self.sym.list_arguments():

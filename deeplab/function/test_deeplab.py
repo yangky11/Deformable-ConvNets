@@ -47,8 +47,8 @@ def test_deeplab(network, dataset, image_set, root_path, dataset_path,
     # infer shape
     data_shape_dict = dict(test_data.provide_data_single)
     arg_shape, _, aux_shape = sym.infer_shape(**data_shape_dict)
-    arg_shape_dict = dict(zip(sym.list_arguments(), arg_shape))
-    aux_shape_dict = dict(zip(sym.list_auxiliary_states(), aux_shape))
+    arg_shape_dict = dict(list(zip(sym.list_arguments(), arg_shape)))
+    aux_shape_dict = dict(list(zip(sym.list_auxiliary_states(), aux_shape)))
 
     # check parameters
     for k in sym.list_arguments():

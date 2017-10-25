@@ -160,7 +160,7 @@ def sample_rois(rois, fg_rois_per_image, rois_per_image, num_classes, cfg,
     # pad more to ensure a fixed minibatch size
     while keep_indexes.shape[0] < rois_per_image:
         gap = np.minimum(len(rois), rois_per_image - keep_indexes.shape[0])
-        gap_indexes = npr.choice(range(len(rois)), size=gap, replace=False)
+        gap_indexes = npr.choice(list(range(len(rois))), size=gap, replace=False)
         keep_indexes = np.append(keep_indexes, gap_indexes)
 
     # select labels

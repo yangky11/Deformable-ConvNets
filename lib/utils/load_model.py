@@ -15,7 +15,7 @@ def load_checkpoint(prefix, epoch):
     save_dict = mx.nd.load('%s-%04d.params' % (prefix, epoch))
     arg_params = {}
     aux_params = {}
-    for k, v in save_dict.items():
+    for k, v in list(save_dict.items()):
         tp, name = k.split(':', 1)
         if tp == 'arg':
             arg_params[name] = v
@@ -31,7 +31,7 @@ def convert_context(params, ctx):
     :return: dict of str of NDArray with context ctx
     """
     new_params = dict()
-    for k, v in params.items():
+    for k, v in list(params.items()):
         new_params[k] = v.as_in_context(ctx)
     return new_params
 
@@ -53,7 +53,7 @@ def load_param(prefix, epoch, convert=False, ctx=None, process=False):
         arg_params = convert_context(arg_params, ctx)
         aux_params = convert_context(aux_params, ctx)
     if process:
-        tests = [k for k in arg_params.keys() if '_test' in k]
+        tests = [k for k in list(arg_params.keys()) if '_test' in k]
         for test in tests:
             arg_params[test.replace('_test', '')] = arg_params.pop(test)
     return arg_params, aux_params

@@ -6,7 +6,7 @@
 # Written by Zheng Zhang
 # --------------------------------------------------------
 
-import cPickle
+import pickle
 import mxnet as mx
 from utils.symbol import Symbol
 

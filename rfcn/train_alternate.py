@@ -6,7 +6,7 @@
 # Modified by Yuwen Xiong
 # --------------------------------------------------------
 
-import _init_paths
+from . import _init_paths
 
 import cv2
 import time
@@ -15,7 +15,7 @@ import logging
 import pprint
 import os
 import sys
-from config.config import config, update_config
+from .config.config import config, update_config
 
 def parse_args():
     parser = argparse.ArgumentParser(description='Train R-FCN network')
@@ -39,9 +39,9 @@ import shutil
 import numpy as np
 import mxnet as mx
 
-from function.train_rpn import train_rpn
-from function.test_rpn import test_rpn
-from function.train_rcnn import train_rcnn
+from .function.train_rpn import train_rpn
+from .function.test_rpn import test_rpn
+from .function.train_rcnn import train_rcnn
 from utils.combine_model import combine_model
 from utils.create_logger import create_logger
 
@@ -118,7 +118,7 @@ def alternate_train(args, ctx, pretrained, epoch):
     combine_model(rpn2_prefix, config.TRAIN.ALTERNATE.rpn2_epoch, rfcn2_prefix, config.TRAIN.ALTERNATE.rfcn2_epoch, final_prefix, 0)
 
 def main():
-    print('Called with argument:', args)
+    print(('Called with argument:', args))
     ctx = [mx.gpu(int(i)) for i in config.gpus.split(',')]
     alternate_train(args, ctx, config.network.pretrained, config.network.pretrained_epoch)
 

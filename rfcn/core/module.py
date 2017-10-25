@@ -272,11 +272,11 @@ class Module(BaseModule):
                 initializer(name, arr)
 
         attrs = self._symbol.attr_dict()
-        for name, arr in self._arg_params.items():
+        for name, arr in list(self._arg_params.items()):
             desc = InitDesc(name, attrs.get(name, None))
             _impl(desc, arr, arg_params)
 
-        for name, arr in self._aux_params.items():
+        for name, arr in list(self._aux_params.items()):
             desc = InitDesc(name, attrs.get(name, None))
             _impl(desc, arr, aux_params)
 
@@ -374,8 +374,8 @@ class Module(BaseModule):
 
         # self._data_shapes, self._label_shapes = _parse_data_desc(
         #     self.data_names, self.label_names, data_shapes, label_shapes)
-        self._data_shapes, self._label_shapes = zip(*[_parse_data_desc(self.data_names, self.label_names, data_shape, label_shape)
-                                                      for data_shape, label_shape in zip(data_shapes, label_shapes)])
+        self._data_shapes, self._label_shapes = list(zip(*[_parse_data_desc(self.data_names, self.label_names, data_shape, label_shape)
+                                                      for data_shape, label_shape in zip(data_shapes, label_shapes)]))
         if self._label_shapes.count(None) == len(self._label_shapes):
             self._label_shapes = None
 
@@ -434,8 +434,8 @@ class Module(BaseModule):
         assert self.binded
         # self._data_shapes, self._label_shapes = _parse_data_desc(
         #     self.data_names, self.label_names, data_shapes, label_shapes)
-        self._data_shapes, self._label_shapes = zip(*[_parse_data_desc(self.data_names, self.label_names, data_shape, label_shape)
-                                                      for data_shape, label_shape in zip(data_shapes, label_shapes)])
+        self._data_shapes, self._label_shapes = list(zip(*[_parse_data_desc(self.data_names, self.label_names, data_shape, label_shape)
+                                                      for data_shape, label_shape in zip(data_shapes, label_shapes)]))
 
         self._exec_group.reshape(self._data_shapes, self._label_shapes)
 
@@ -835,7 +835,7 @@ class MutableModule(BaseModule):
         module = Module(self._symbol, self._data_names, self._label_names, logger=self.logger,
                         context=self._context, work_load_list=self._work_load_list,
                         fixed_param_names=self._fixed_param_names)
-        module.bind([max_data_shapes for _ in xrange(len(self._context))], [max_label_shapes for _ in xrange(len(self._context))],
+        module.bind([max_data_shapes for _ in range(len(self._context))], [max_label_shapes for _ in range(len(self._context))],
                     for_training, inputs_need_grad, force_rebind=False, shared_module=None)
         self._curr_module = module
 
@@ -1012,27 +1012,27 @@ class MutableModule(BaseModule):
 
         # get current_shapes
         if self._curr_module.label_shapes is not None:
-            current_shapes = [dict(self._curr_module.data_shapes[i] + self._curr_module.label_shapes[i]) for i in xrange(len(self._context))]
+            current_shapes = [dict(self._curr_module.data_shapes[i] + self._curr_module.label_shapes[i]) for i in range(len(self._context))]
         else:
-            current_shapes = [dict(self._curr_module.data_shapes[i]) for i in xrange(len(self._context))]
+            current_shapes = [dict(self._curr_module.data_shapes[i]) for i in range(len(self._context))]
 
         # get input_shapes
         if is_train:
-            input_shapes = [dict(data_batch.provide_data[i] + data_batch.provide_label[i]) for i in xrange(len(self._context))]
+            input_shapes = [dict(data_batch.provide_data[i] + data_batch.provide_label[i]) for i in range(len(self._context))]
         else:
-            input_shapes = [dict(data_batch.provide_data[i]) for i in xrange(len(data_batch.provide_data))]
+            input_shapes = [dict(data_batch.provide_data[i]) for i in range(len(data_batch.provide_data))]
 
         # decide if shape changed
         shape_changed = len(current_shapes) != len(input_shapes)
         for pre, cur in zip(current_shapes, input_shapes):
-            for k, v in pre.items():
+            for k, v in list(pre.items()):
                 if v != cur[k]:
                     shape_changed = True
 
         if shape_changed:
             # self._curr_module.reshape(data_batch.provide_data, data_batch.provide_label)
             module = Module(self._symbol, self._data_names, self._label_names,
-                            logger=self.logger, context=[self._context[i] for i in xrange(len(data_batch.provide_data))],
+                            logger=self.logger, context=[self._context[i] for i in range(len(data_batch.provide_data))],
                             work_load_list=self._work_load_list,
                             fixed_param_names=self._fixed_param_names)
             module.bind(data_batch.provide_data, data_batch.provide_label, self._curr_module.for_training,
