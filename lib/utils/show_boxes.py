@@ -8,7 +8,7 @@ import matplotlib
 matplotlib.use('agg')
 import matplotlib.pyplot as plt
 from random import random as rand
-def show_boxes(im, dets, classes, scale = 1.0):
+def show_boxes(im, dets, classes, filename, scale = 1.0):
     plt.cla()
     plt.axis("off")
     plt.imshow(im)
@@ -29,5 +29,6 @@ def show_boxes(im, dets, classes, scale = 1.0):
                                '{:s} {:.3f}'.format(cls_name, score),
                                bbox=dict(facecolor=color, alpha=0.5), fontsize=9, color='white')
     plt.show()
+    plt.savefig(filename)
     return im
 

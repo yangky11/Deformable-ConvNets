@@ -124,7 +124,7 @@ def main():
         # visualize
         im = cv2.imread(cur_path + '/../demo/' + im_name)
         im = cv2.cvtColor(im, cv2.COLOR_BGR2RGB)
-        show_boxes(im, dets_nms, classes, 1)
+        show_boxes(im, dets_nms, classes, 'output_' + im_name, 1)
 
     print('done')
 

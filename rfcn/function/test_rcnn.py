@@ -14,7 +14,7 @@ import os
 import mxnet as mx
 
 from symbols import *
-from dataset import *
+from dataset import folder
 from core.loader import TestLoader
 from core.tester import Predictor, pred_eval
 from utils.load_model import load_param
@@ -34,7 +34,7 @@ def test_rcnn(cfg, dataset, image_set, root_path, dataset_path,
     if has_rpn:
         sym_instance = eval(cfg.symbol + '.' + cfg.symbol)()
         sym = sym_instance.get_symbol(cfg, is_train=False)
-        imdb = eval(dataset)(image_set, root_path, dataset_path, result_path=output_path)
+        imdb = eval(dataset)(dataset_path)
         roidb = imdb.gt_roidb()
     else:
         sym_instance = eval(cfg.symbol + '.' + cfg.symbol)()
