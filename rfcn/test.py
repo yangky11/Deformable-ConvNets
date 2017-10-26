@@ -6,7 +6,7 @@
 # Modified by Yuwen Xiong
 # --------------------------------------------------------
 
-from . import _init_paths
+import _init_paths
 
 import cv2
 import argparse
@@ -14,7 +14,7 @@ import os
 import sys
 import time
 import logging
-from .config.config import config, update_config
+from config.config import config, update_config
 
 def parse_args():
     parser = argparse.ArgumentParser(description='Test a R-FCN network')
@@ -37,7 +37,7 @@ curr_path = os.path.abspath(os.path.dirname(__file__))
 sys.path.insert(0, os.path.join(curr_path, '../external/mxnet', config.MXNET_VERSION))
 
 import mxnet as mx
-from .function.test_rcnn import test_rcnn
+from function.test_rcnn import test_rcnn
 from utils.create_logger import create_logger
 
 
