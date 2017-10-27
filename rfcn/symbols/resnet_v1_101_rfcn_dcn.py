@@ -988,6 +988,10 @@ class resnet_v1_101_rfcn_dcn(Symbol):
             group = mx.sym.Group([cls_prob, bbox_pred])
 
         self.sym = group
+        print('/home/yangky/Deformable-ConvNets/rfcn/symbols/resnet_v1_101_rfcn_dcn.py')
+        print(self.sym.list_outputs)
+        import sys
+        sys.exit()
         return group
 
     def init_weight_rpn(self, cfg, arg_params, aux_params):

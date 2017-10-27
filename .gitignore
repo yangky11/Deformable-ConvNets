@@ -94,4 +94,8 @@ model
 .db
 
 # Model
-.params 
+.params
+
+# Images
+*.png
+*.jpg 

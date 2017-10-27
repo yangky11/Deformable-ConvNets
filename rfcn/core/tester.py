@@ -150,9 +150,13 @@ def im_detect(predictor, data_batch, data_names, scales, cfg):
         pred_boxes_all.append(pred_boxes)
     return scores_all, pred_boxes_all, data_dict_all
 
-def psoft(cls_dets):
+
+def psoft(cls_dets, thresh):
     cls_dets = soft_nms(cls_dets, method=2)
+    indexes = np.where(cls_dets[:, -1] > thresh)[0]
+    cls_dets = cls_dets[indexes]
     return cls_dets
+
 
 def pred_eval(predictor, test_data, imdb, cfg, vis=False, thresh=1e-3, logger=None, ignore_cache=True):
     """
@@ -165,7 +169,6 @@ def pred_eval(predictor, test_data, imdb, cfg, vis=False, thresh=1e-3, logger=No
     :param thresh: valid detection threshold
     :return:
     """
-
     det_file = os.path.join(imdb.result_path, imdb.name + '_detections.pkl')
     if os.path.exists(det_file) and not ignore_cache:
         with open(det_file, 'rb') as fid:
@@ -193,10 +196,10 @@ def pred_eval(predictor, test_data, imdb, cfg, vis=False, thresh=1e-3, logger=No
     all_boxes = [[[] for _ in range(num_images)]
                  for _ in range(imdb.num_classes)]
 
+
     idx = 0
     data_time, net_time, post_time = 0.0, 0.0, 0.0
     t = time.time()
-    pl = Pool(8)
     for im_info, data_batch in test_data:
         t1 = time.time() - t
         t = time.time()
@@ -207,14 +210,14 @@ def pred_eval(predictor, test_data, imdb, cfg, vis=False, thresh=1e-3, logger=No
         t2 = time.time() - t
         t = time.time()
         for delta, (scores, boxes, data_dict) in enumerate(zip(scores_all, boxes_all, data_dict_all)):
-            commands = []
+            # scores: 300 x 81 numpy.array
+            nms_dets = []
             for j in range(1, imdb.num_classes):
                 indexes = np.where(scores[:, j] > thresh)[0]
                 cls_scores = scores[indexes, j, np.newaxis]
                 cls_boxes = boxes[indexes, 4:8] if cfg.CLASS_AGNOSTIC else boxes[indexes, j * 4:(j + 1) * 4]
                 cls_dets = np.hstack((cls_boxes, cls_scores))
-                commands.append(cls_dets)
-            nms_dets = pl.map(psoft, commands)
+                nms_dets.append(psoft(cls_dets, thresh))
             for j in range(1, imdb.num_classes):
                 all_boxes[j][idx+delta] = nms_dets[j-1]
 
@@ -240,7 +243,6 @@ def pred_eval(predictor, test_data, imdb, cfg, vis=False, thresh=1e-3, logger=No
         print('testing {}/{} data {:.4f}s net {:.4f}s post {:.4f}s'.format(idx, imdb.num_images, data_time / idx * test_data.batch_size, net_time / idx * test_data.batch_size, post_time / idx * test_data.batch_size))
         if logger:
             logger.info('testing {}/{} data {:.4f}s net {:.4f}s post {:.4f}s'.format(idx, imdb.num_images, data_time / idx * test_data.batch_size, net_time / idx * test_data.batch_size, post_time / idx * test_data.batch_size))
-    pl.close()
     with open(det_file, 'wb') as f:
         pickle.dump(all_boxes, f, protocol=pickle.HIGHEST_PROTOCOL)
 

@@ -16,6 +16,8 @@ import cv2
 from config.config import config, update_config
 from utils.image import resize, transform
 import numpy as np
+import matplotlib
+matplotlib.use('agg')
 # get config
 os.environ['PYTHONUNBUFFERED'] = '1'
 os.environ['MXNET_CUDNN_AUTOTUNE_DEFAULT'] = '0'
