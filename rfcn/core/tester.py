@@ -46,7 +46,7 @@ def im_proposal(predictor, data_batch, data_names, scales):
     for output, data_dict, scale in zip(output_all, data_dict_all, scales):
         # drop the batch index
         boxes = output['rois_output'].asnumpy()[:, 1:]
-        scores = output['rois_score'].asnumpy()
+        scores = output['roi_score'].asnumpy()
 
         # transform to original scale
         boxes = boxes / scale
@@ -128,8 +128,11 @@ def im_detect(predictor, data_batch, data_names, scales, cfg):
     data_dict_all = [dict(list(zip(data_names, idata))) for idata in data_batch.data]
     scores_all = []
     pred_boxes_all = []
+    roi_score_all = []
+    rois_all = []
     for output, data_dict, scale in zip(output_all, data_dict_all, scales):
         if cfg.TEST.HAS_RPN:
+            assert np.all(output['rois_output'].asnumpy()[:, 0] == 0.)
             rois = output['rois_output'].asnumpy()[:, 1:]
         else:
             rois = data_dict['rois'].asnumpy().reshape((-1, 5))[:, 1:]
@@ -138,6 +141,7 @@ def im_detect(predictor, data_batch, data_names, scales, cfg):
         # save output
         scores = output['cls_prob_reshape_output'].asnumpy()[0]
         bbox_deltas = output['bbox_pred_reshape_output'].asnumpy()[0]
+        roi_score = output['roi_score_output'].asnumpy()[0]
 
         # post processing
         pred_boxes = bbox_pred(rois, bbox_deltas)
@@ -145,10 +149,13 @@ def im_detect(predictor, data_batch, data_names, scales, cfg):
 
         # we used scaled image & roi to train, so it is necessary to transform them back
         pred_boxes = pred_boxes / scale
+        rois = rois / scale
 
         scores_all.append(scores)
         pred_boxes_all.append(pred_boxes)
-    return scores_all, pred_boxes_all, data_dict_all
+        roi_score_all.append(roi_score)
+        rois_all.append(rois)
+    return scores_all, pred_boxes_all, roi_score_all, rois_all, data_dict_all
 
 
 def psoft(cls_dets, thresh):

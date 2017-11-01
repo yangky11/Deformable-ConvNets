@@ -781,8 +781,8 @@ class resnet_v1_101_rfcn_dcn(Symbol):
                     rpn_pre_nms_top_n=cfg.TEST.RPN_PRE_NMS_TOP_N, rpn_post_nms_top_n=cfg.TEST.RPN_POST_NMS_TOP_N,
                     threshold=cfg.TEST.RPN_NMS_THRESH, rpn_min_size=cfg.TEST.RPN_MIN_SIZE)
             else:
-                rois = mx.sym.Custom(
-                    cls_prob=rpn_cls_prob_reshape, bbox_pred=rpn_bbox_pred, im_info=im_info, name='rois',
+                rois, roi_score = mx.sym.Custom(
+                    cls_prob=rpn_cls_prob_reshape, bbox_pred=rpn_bbox_pred, im_info=im_info, name='rois', output_score=True,
                     op_type='proposal', feat_stride=cfg.network.RPN_FEAT_STRIDE,
                     scales=tuple(cfg.network.ANCHOR_SCALES), ratios=tuple(cfg.network.ANCHOR_RATIOS),
                     rpn_pre_nms_top_n=cfg.TEST.RPN_PRE_NMS_TOP_N, rpn_post_nms_top_n=cfg.TEST.RPN_POST_NMS_TOP_N,
@@ -816,6 +816,10 @@ class resnet_v1_101_rfcn_dcn(Symbol):
         bbox_pred = mx.sym.Pooling(name='ave_bbox_pred_rois', data=psroipooled_loc_rois, pool_type='avg', global_pool=True, kernel=(7, 7))
         cls_score = mx.sym.Reshape(name='cls_score_reshape', data=cls_score, shape=(-1, num_classes))
         bbox_pred = mx.sym.Reshape(name='bbox_pred_reshape', data=bbox_pred, shape=(-1, 4 * num_reg_classes))
+        
+        mx.contrib.sym.DeformablePSROIPooling(name='rfcn_cls_offset', data=rfcn_cls_offset_t, rois=rois, group_size=7, pooled_size=7,
+                                                                sample_per_part=4, no_trans=True, part_size=7, output_dim=2 * num_classes, spatial_scale=0.0625)
+
 
         if is_train:
             if cfg.TRAIN.ENABLE_OHEM:
@@ -844,7 +848,7 @@ class resnet_v1_101_rfcn_dcn(Symbol):
                                       name='cls_prob_reshape')
             bbox_pred = mx.sym.Reshape(data=bbox_pred, shape=(cfg.TEST.BATCH_IMAGES, -1, 4 * num_reg_classes),
                                        name='bbox_pred_reshape')
-            group = mx.sym.Group([rois, cls_prob, bbox_pred])
+            group = mx.sym.Group([rois, roi_score, cls_prob, bbox_pred])
 
         self.sym = group
         return group
