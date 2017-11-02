@@ -130,6 +130,7 @@ def im_detect(predictor, data_batch, data_names, scales, cfg):
     pred_boxes_all = []
     roi_score_all = []
     rois_all = []
+    roi_feat_all = []
     for output, data_dict, scale in zip(output_all, data_dict_all, scales):
         if cfg.TEST.HAS_RPN:
             assert np.all(output['rois_output'].asnumpy()[:, 0] == 0.)
@@ -141,7 +142,11 @@ def im_detect(predictor, data_batch, data_names, scales, cfg):
         # save output
         scores = output['cls_prob_reshape_output'].asnumpy()[0]
         bbox_deltas = output['bbox_pred_reshape_output'].asnumpy()[0]
-        roi_score = output['roi_score_output'].asnumpy()[0]
+        roi_score = output['rois_score'].asnumpy()
+        indice = roi_score.flatten().argsort()[::-1]
+        roi_score = roi_score[indice]
+        roi_feat = output['roi_feat_output_output'].asnumpy()[indice]
+        rois = rois[indice]
 
         # post processing
         pred_boxes = bbox_pred(rois, bbox_deltas)
@@ -155,7 +160,8 @@ def im_detect(predictor, data_batch, data_names, scales, cfg):
         pred_boxes_all.append(pred_boxes)
         roi_score_all.append(roi_score)
         rois_all.append(rois)
-    return scores_all, pred_boxes_all, roi_score_all, rois_all, data_dict_all
+        roi_feat_all.append(roi_feat)
+    return scores_all, pred_boxes_all, roi_score_all, rois_all, roi_feat_all, data_dict_all
 
 
 def psoft(cls_dets, thresh):
@@ -202,6 +208,7 @@ def pred_eval(predictor, test_data, imdb, cfg, vis=False, thresh=1e-3, logger=No
     #    (x1, y1, x2, y2, score)
     all_boxes = [[[] for _ in range(num_images)]
                  for _ in range(imdb.num_classes)]
+    rois = []
 
 
     idx = 0
@@ -212,7 +219,18 @@ def pred_eval(predictor, test_data, imdb, cfg, vis=False, thresh=1e-3, logger=No
         t = time.time()
 
         scales = [iim_info[0, 2] for iim_info in im_info]
-        scores_all, boxes_all, data_dict_all = im_detect(predictor, data_batch, data_names, scales, cfg)
+        scores_all, boxes_all, roi_score_all, rois_all, roi_feat_all, data_dict_all = im_detect(predictor, data_batch, data_names, scales, cfg)
+        assert len(roi_score_all) == len(rois_all) == len(roi_feat_all) == 1
+        nms_input = np.hstack((rois_all[0], roi_score_all[0]))
+        roi_nms = psoft(nms_input, -1.0)
+        roi_bbox = roi_nms[:, :4]
+        roi_score = roi_nms[:, 4]
+        roi_feat = np.zeros((roi_nms.shape[0], roi_feat_all[0].shape[1]), dtype=roi_feat_all[0].dtype)
+        for i in range(roi_nms.shape[0]):
+          for j in range(nms_input.shape[0]):
+            if np.all(roi_nms[i] == nms_input[j]):
+              roi_feat[i] = roi_feat_all[0][j]
+        rois.append({'score': roi_score, 'bbox': roi_bbox, 'feat': roi_feat})
 
         t2 = time.time() - t
         t = time.time()
@@ -253,7 +271,7 @@ def pred_eval(predictor, test_data, imdb, cfg, vis=False, thresh=1e-3, logger=No
     with open(det_file, 'wb') as f:
         pickle.dump(all_boxes, f, protocol=pickle.HIGHEST_PROTOCOL)
 
-    info_str = imdb.evaluate_detections(all_boxes)
+    info_str = imdb.evaluate_detections(all_boxes, rois)
     if logger:
         logger.info('evaluate detections: \n{}'.format(info_str))
 

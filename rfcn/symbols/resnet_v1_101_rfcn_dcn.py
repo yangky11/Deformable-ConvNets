@@ -818,8 +818,8 @@ class resnet_v1_101_rfcn_dcn(Symbol):
         bbox_pred = mx.sym.Reshape(name='bbox_pred_reshape', data=bbox_pred, shape=(-1, 4 * num_reg_classes))
         
         roi_feat_map = mx.symbol.ROIPooling(name='roi_feat_map', data=relu_new_1, rois=rois, pooled_size=(7, 7), spatial_scale=0.0625)
-        roi_feat = mx.sym.Pooling(name='roi_feat', data=roi_feat_map, pool_type='avg', global_pool=True, kernel=(7, 7))
-        roi_feat = mx.sym.Reshape(name='roi_feat_reshape', data=roi_feat, shape=(-1, 1024))
+        roi_feat = mx.sym.Pooling(name='roi_feat_pooling', data=roi_feat_map, pool_type='avg', global_pool=True, kernel=(7, 7))
+        roi_feat = mx.sym.Reshape(name='roi_feat_output', data=roi_feat, shape=(-1, 1024))
 
         
         if is_train:
